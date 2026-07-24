@@ -5,12 +5,14 @@
 - CMake scaffold replicated from [mp-iterative](https://github.com/stillwater-sc/mp-iterative):
   INTERFACE library `sw::mp_ir`, find_package → FetchContent fallback for MTL5 +
   Universal, config-package install, CI matrix (MSVC/GCC/Clang/AppleClang).
-- Shared driver `include/sw/mp_ir/lu_iterative_refinement.hpp`: LU factor in a
-  low working precision + refine with a higher-precision residual, over MTL5's
-  `lu_factor`/`lu_solve`.
-- Smoke test: LU-IR on a diagonally dominant dense system in `double`, `float`,
-  `cfloat<16,5>`, and `posit<16,2>` — refined residual beats the plain
-  working-precision solve.
+- Thin driver `include/sw/mp_ir/lu_iterative_refinement.hpp`: re-exports MTL5's
+  Universal-free core `mtl::lu_iterative_refine<Working>` (factor in a low
+  Working precision, refine with a higher-precision residual) and
+  `mtl::normwise_backward_error` under `sw::mp_ir`. The reusable algorithm lives
+  in MTL5; mp-ir supplies the Universal number systems and experiments.
+- Smoke test: LU-IR on a diagonally dominant dense system stored in `double`
+  with the factorization in `double` / `float` / `cfloat<16,5>` / `posit<16,2>`
+  — refined residual beats the plain low-precision solve.
 - Demo application `lu_ir_precision` (refined-vs-unrefined table) and benchmark
   `lu_ir_benchmark` (factor/refine timing + steps to floor).
 - Repo organized by refinement category: `dense_lu/` (LU factor + refine),
