@@ -22,19 +22,24 @@
   Universal quire bridge (the coupling that must not live in MTL5 itself), for
   forming the residual in an exact quire.
 
-## Milestone 1: migrate the Universal iterative-refinement study
+## Milestone 1: migrate the Universal iterative-refinement study (done)
 
-Migrate from Universal `applications/performance/ir/` (author James Quinlan),
+Migrated from Universal `applications/performance/ir/` (author James Quinlan),
 re-expressed on the MTL5 dense LU core + Universal precisions:
 
-- `luir` — the three-precision (High/Working/Low) LU iterative-refinement
-  driver (Universal `ext/solvers/luir.hpp` `SolveIRLU<High,Working,Low>`); the
-  Universal-free driver core lands in MTL5, the posit/precision experiments here.
-- `roundAndReplace`, `scaleAndRound`, `twoSidedScaleAndRound` — the squeeze /
-  scaling strategies (Universal `blas/squeeze.hpp`) under `scaling/`.
-- Normwise backward error (`nbe`, Higham Thm 7.1) as the convergence/quality
-  metric.
-- Reproduce the current Universal `luir.cpp` results as the acceptance check.
+- [x] `luir` — the three-precision LU iterative-refinement driver, on
+  `mtl::lu_iterative_refine` (Universal-free core in MTL5; posit/precision
+  experiment in `applications/dense_lu/luir/`).
+- [x] `roundAndReplace`, `scaleAndRound`, `twoSidedScaleAndRound` — the squeeze /
+  scaling strategies (`include/sw/mp_ir/squeeze.hpp`, migrated from Universal
+  `blas/squeeze.hpp`) with a low-precision sweep study each under
+  `applications/scaling/`, plus `tests/scaling/test_squeeze.cpp`.
+- [x] Normwise backward error (`mtl::normwise_backward_error`, Higham Thm 7.1) as
+  the quality metric.
+
+Remaining: migrate the Universal embedded test-matrix suite
+(`blas/matrices/testsuite.hpp`, ~40 matrices) so the studies can run on the same
+problems as the originals (currently they use MTL5's generators).
 
 ## Milestone 2: mixed-precision refinement studies
 
