@@ -1,0 +1,2 @@
+add_executable(two_sided_scale_and_round two_sided_scale_and_round.cpp)
+target_link_libraries(two_sided_scale_and_round PRIVATE sw::mp_ir)

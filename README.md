@@ -55,8 +55,9 @@ applications/
 benchmarks/
   dense_lu/                      # factor/refine timing + steps-to-floor
 tests/
-  dense_lu/                      # LU-IR smoke test across number types
-  scaling/  sparse/              # (no tests yet -- see docs/roadmap.md)
+  dense_lu/                      # LU-IR smoke test + migrated luir experiment
+  scaling/                       # squeeze preconditioners (round/scale/two-sided)
+  sparse/                        # (no tests yet -- see docs/roadmap.md)
 docs/roadmap.md                  # milestones and migration plan
 ```
 
