@@ -41,6 +41,7 @@
 
 # Build directories
 build/
+build_*/
 Build/
 build-*/
 
@@ -67,3 +68,9 @@ vcpkg_installed/
 # test output & cache
 Testing/
 .cache/
+
+# CMake presets (user-local)
+CMakeUserPresets.json
+
+# Downloaded matrices (fetched on demand, never committed)
+data/
