@@ -14,8 +14,11 @@
 // precision (posit<32,8>, where the LU was stored) is subsumed by MTL5's
 // two-precision core (factor precision + residual precision).
 //
-// The test matrices come from MTL5's Universal-free generators rather than the
-// Universal embedded matrix suite (whose migration is tracked separately).
+// Test matrices come from MTL5's Universal-free layer: the parametric generators
+// (minij/hilbert/lehmer/frank/moler/pascal) for arbitrary size, and the named
+// test-matrix catalog (mtl::testsuite -- the migrated SuiteSparse/textbook
+// problems: bcsstk*, west*, steam*, fs_183*, saylr1, gre_343, ...) for the same
+// fixed problems the Universal originals used (universal#1210).
 #include <cmath>
 #include <cstddef>
 #include <iomanip>
@@ -34,6 +37,7 @@
 #include <mtl/generators/frank.hpp>
 #include <mtl/generators/moler.hpp>
 #include <mtl/generators/pascal.hpp>
+#include <mtl/generators/testsuite.hpp>   // named SuiteSparse/textbook catalog (universal#1210)
 
 #include <sw/mp_ir/lu_iterative_refinement.hpp>
 
@@ -49,6 +53,10 @@ using High = sw::universal::posit<64, 5>;   // high (storage + residual) precisi
 // (frank/moler/pascal) are returned directly. Default "dd" is a well-conditioned
 // diagonally dominant system.
 mtl::mat::dense2D<double> make_reference(const std::string& name, std::size_t n) {
+    // Named catalog matrices (SuiteSparse/textbook, e.g. bcsstk01, west0132,
+    // steam1) are fixed-size problems -- n is ignored for these.
+    if (mtl::testsuite::kappa_table().count(name)) return mtl::testsuite::by_name(name);
+
     mtl::mat::dense2D<double> A(n, n);
     auto fill = [&](auto gen) { for (std::size_t i = 0; i < n; ++i) for (std::size_t j = 0; j < n; ++j) A(i, j) = gen(i, j); };
     if      (name == "minij")   fill(mtl::generators::minij<double>(n));
@@ -69,12 +77,20 @@ try {
     using namespace sw::universal;
 
     const std::string matrix = (argc > 1) ? argv[1] : "minij";
-    const std::size_t n      = (argc > 2) ? static_cast<std::size_t>(std::stoul(argv[2])) : 8;
+    std::size_t       n      = (argc > 2) ? static_cast<std::size_t>(std::stoul(argv[2])) : 8;
     const int         maxit  = (argc > 3) ? std::atoi(argv[3]) : 10;
 
-    // build the reference in double, then cast to the High storage precision
+    // build the reference in double, then cast to the High storage precision.
+    // Named catalog matrices are fixed-size, so take n from the actual matrix
+    // (for the parametric generators this already equals the requested n).
     mtl::mat::dense2D<double> Ad = make_reference(matrix, n);
-    const double cond = mtl::condition_number(Ad);
+    n = Ad.num_rows();
+
+    // catalog matrices carry a published condition number; generators are
+    // estimated from the assembled matrix.
+    const double cond = mtl::testsuite::kappa_table().count(matrix)
+                        ? mtl::testsuite::kappa(matrix)
+                        : mtl::condition_number(Ad);
 
     mtl::mat::dense2D<High> A(n, n);
     for (std::size_t i = 0; i < n; ++i)
