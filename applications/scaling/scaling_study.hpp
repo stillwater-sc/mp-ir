@@ -21,6 +21,7 @@
 #include <mtl/generators/minij.hpp>
 #include <mtl/generators/lehmer.hpp>
 #include <mtl/generators/hilbert.hpp>
+#include <mtl/generators/testsuite.hpp>   // named SuiteSparse/textbook catalog (universal#1210)
 
 #include <sw/mp_ir/lu_iterative_refinement.hpp>
 #include <sw/mp_ir/squeeze.hpp>
@@ -38,6 +39,13 @@ enum class squeeze_kind { none, round_and_replace, scale_and_round, two_sided };
 
 // materialize a named reference matrix (double), scaled by `scale`
 inline mtl::mat::dense2D<double> reference(const std::string& name, std::size_t n, double scale) {
+    // Named catalog matrices (SuiteSparse/textbook) are fixed-size: n is ignored,
+    // `scale` still applied so the scaling study can probe row/column magnitudes.
+    if (mtl::testsuite::kappa_table().count(name)) {
+        auto A = mtl::testsuite::by_name(name);
+        if (scale != 1.0) for (std::size_t i = 0; i < A.num_rows(); ++i) for (std::size_t j = 0; j < A.num_cols(); ++j) A(i, j) *= scale;
+        return A;
+    }
     mtl::mat::dense2D<double> A(n, n);
     auto fill = [&](auto gen) { for (std::size_t i = 0; i < n; ++i) for (std::size_t j = 0; j < n; ++j) A(i, j) = scale * gen(i, j); };
     if      (name == "minij")   fill(mtl::generators::minij<double>(n));
@@ -112,8 +120,9 @@ inline void run(const std::string& squeeze_name, squeeze_kind kind,
                 const std::string& matrix, std::size_t n, double scale, High T) {
     using namespace sw::universal;
     auto ref = reference(matrix, n, scale);
+    const std::size_t actual_n = ref.num_rows();  // catalog matrices are fixed-size (n ignored)
     std::cout << squeeze_name << " squeeze -- matrix " << matrix << " x" << scale
-              << " (" << n << "x" << n << "), High = double, T = " << double(T) << "\n";
+              << " (" << actual_n << "x" << actual_n << "), High = double, T = " << double(T) << "\n";
     std::cout << "  low precision   plain LU-IR                squeezed LU-IR\n";
     row<posit<8, 2>>  ("posit<8,2>",  ref, kind, T);
     row<posit<12, 2>> ("posit<12,2>", ref, kind, T);
