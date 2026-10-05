@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 4.0)
+cmake_minimum_required(VERSION 3.22...4.0)
 
 if(NOT DEFINED MPIR_MAJOR)
 	set(MPIR_MAJOR 0)
@@ -49,12 +49,12 @@ else()
 		GIT_REPOSITORY https://github.com/stillwater-sc/universal.git
 		GIT_TAG        main
 		GIT_SHALLOW    TRUE
+		# Header-only: point SOURCE_SUBDIR at a directory without a CMakeLists.txt
+		# so MakeAvailable populates but does NOT add_subdirectory (avoids
+		# building the dependency's own targets and tests).
+		SOURCE_SUBDIR  _header_only_
 	)
-	# Header-only: populate but do NOT add_subdirectory (avoids building targets)
-	FetchContent_GetProperties(universal)
-	if(NOT universal_POPULATED)
-		FetchContent_MakeAvailable(universal)
-	endif()
+	FetchContent_MakeAvailable(universal)
 	# Universal headers use two include conventions:
 	#   - External: #include <sw/universal/...>  (needs include/)
 	#   - Internal: #include <universal/...>     (needs include/sw/)
@@ -74,12 +74,12 @@ else()
 		GIT_REPOSITORY https://github.com/stillwater-sc/mtl5.git
 		GIT_TAG        main
 		GIT_SHALLOW    TRUE
+		# Header-only: point SOURCE_SUBDIR at a directory without a CMakeLists.txt
+		# so MakeAvailable populates but does NOT add_subdirectory (avoids
+		# building the dependency's own targets and tests).
+		SOURCE_SUBDIR  _header_only_
 	)
-	# Header-only: populate but do NOT add_subdirectory (avoids building targets)
-	FetchContent_GetProperties(mtl5)
-	if(NOT mtl5_POPULATED)
-		FetchContent_MakeAvailable(mtl5)
-	endif()
+	FetchContent_MakeAvailable(mtl5)
 	target_include_directories(${PROJECT_NAME} INTERFACE
 		$<BUILD_INTERFACE:${mtl5_SOURCE_DIR}/include>)
 endif()
