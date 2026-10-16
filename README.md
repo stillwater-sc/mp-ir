@@ -48,8 +48,6 @@ and **sparse** (sparse direct factor + refine, driving MTL5's core).
 ```
 include/sw/mp_ir/
   lu_iterative_refinement.hpp    # re-exports MTL5 core (mtl::lu_iterative_refine)
-include/mtl/math/
-  quire_accumulator.hpp          # MTL5 accumulator_traits <- Universal quire bridge
 applications/
   dense_lu/lu_ir_precision/      # refined-vs-unrefined residual across precisions
 benchmarks/
