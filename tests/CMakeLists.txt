@@ -13,6 +13,9 @@ endfunction()
 #                   one-/two-sided scaling into a low-precision factor)
 #   3. sparse    -- sparse direct factor + refinement (drives MTL5's
 #                   Universal-free sparse iterative_refine core)
+#   4. accumulation -- the quire rows of MTL5's accumulation validation
+#                   matrix (stillwater-sc/mtl5#586): direct solvers, refinement
 add_subdirectory(dense_lu)
 add_subdirectory(scaling)
 add_subdirectory(sparse)
+add_subdirectory(accumulation)
